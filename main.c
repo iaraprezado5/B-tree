@@ -1,3 +1,7 @@
+//Implemente um B+ Tree, assume registos de 708bytes e blocos (blocks) de 4Kbytes, a chave (key) é um inteiro de 32 bits (int32_t).
+
+//Input is a file with the following structure (seperated by ;), where each line is a record. First line must be ignored.
+
 #define MaxM 5 //size of the tree arrays
 #define MaxL 5 //size of linked list
 #include <stdio.h>
