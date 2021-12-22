@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct record {
     uint32_t id;
@@ -25,18 +26,17 @@ typedef struct record {
     char motivation[350];
 } record;
 
-typedef struct list_node{
-    struct list_node* next;
-    record* contents;
-
-    struct list_node* prev;
-    uint32_t leaf;
-}list_node;
-
 typedef struct tree_node{
     uint32_t id;
-    struct tree_node* child;
-    list_node* list;
+    struct tree_node* child[MaxL];
+    record* contents;
+    uint32_t leaf;
+    void **pointers;
+    int *keys;
+    struct node *parent;
+    bool is_leaf;
+    int num_keys;
+    struct node *next;
 }tree_node;
 
 
@@ -47,12 +47,49 @@ uint32_t converter_int(char arr[]){
     }
 }
 
+tree_node* make_node(void){
+    tree_node* new_node;
+    new_node = malloc(sizeof(tree_node));
+    if(new_node == NULL){
+        printf("Error in node creation");
+        exit(1);
+    }
+    new_node -> keys = malloc(sizeof(MaxL -1) * sizeof(int));
+    if(new_node->keys == NULL){
+        printf("Error in new node keys array");
+        exit(1);
+    }
+    new_node ->pointers = malloc(sizeof(MaxL)* sizeof(void*));
+    if(new_node->pointers == NULL){
+        printf("Error in new node pointers array");
+        exit(1);
+    }
+    new_node->is_leaf = false;
+    new_node->num_keys = 0;
+    new_node -> parent = NULL;
+    new_node-> next = NULL;
+    return new_node;
+}
+
+tree_node* make_leaf(void){
+    tree_node *leaf = make_node();
+    leaf-> is_leaf = true;
+    return leaf;
+}
+
+tree_node *new_tree(int key, record* pointer){
+    tree_node* root = make_leaf();
+    root->keys[0] = key;
+    root-> pointers[0] = pointer;
+    root -> pointers[MaxL -1] = NULL;
+    root -> num_keys++;
+    return root;
+}
+
 int main(int argc, char *argv[]) {
 
     printf("Size of struct; %lu\n", sizeof(record));
 
     return 0;
 }
-
-
 
