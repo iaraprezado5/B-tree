@@ -26,70 +26,92 @@ typedef struct record {
     char motivation[350];
 } record;
 
+typedef struct list_node{
+    struct list_node* next;
+    record* contents;
+    struct list_node* prev;
+    uint32_t leaf;
+}list_node;
+
 typedef struct tree_node{
     uint32_t id;
-    struct tree_node* child[MaxL];
-    record* contents;
-    uint32_t leaf;
-    void **pointers;
-    int *keys;
-    struct node *parent;
-    bool is_leaf;
-    int num_keys;
-    struct node *next;
+    struct tree_node* child;
+    list_node* list;
 }tree_node;
 
 
-uint32_t converter_int(char arr[]){
-    uint32_t num =0;
-    for(uint32_t x=0; arr[x] != "/0"; x++){
-        num = 10 * num + (arr[x] - '0');
+int size_list(list_node * list_position){
+    int tamanho;
+    while(list_position ->next != NULL){
+        tamanho++;
     }
+    tamanho++;
+    return tamanho;
 }
 
-tree_node* make_node(void){
-    tree_node* new_node;
-    new_node = malloc(sizeof(tree_node));
-    if(new_node == NULL){
-        printf("Error in node creation");
-        exit(1);
-    }
-    new_node -> keys = malloc(sizeof(MaxL -1) * sizeof(int));
-    if(new_node->keys == NULL){
-        printf("Error in new node keys array");
-        exit(1);
-    }
-    new_node ->pointers = malloc(sizeof(MaxL)* sizeof(void*));
-    if(new_node->pointers == NULL){
-        printf("Error in new node pointers array");
-        exit(1);
-    }
-    new_node->is_leaf = false;
-    new_node->num_keys = 0;
-    new_node -> parent = NULL;
-    new_node-> next = NULL;
-    return new_node;
+int add_node(){
+
 }
 
-tree_node* make_leaf(void){
-    tree_node *leaf = make_node();
-    leaf-> is_leaf = true;
-    return leaf;
+int insert_node(record* node, tree_node arr[]){
+    if (node == NULL){
+        return 0;
+    }
+    int aux;
+    if ((&arr[0])->child == NULL) {
+        for (int i = 0; i != MaxM; i++){
+            if (node->id < (&arr[i])->list->contents->id){
+                aux = i - 1;
+                break;
+            }//descobrir indice
+            else {
+                aux = i;
+            }
+        }
+        list_node* list_position = (&arr)[aux]->list;
+        list_node* node_position = (&arr)[aux]->list;
+        for (; node_position->next != NULL; node_position = node_position->next) {
+            if (node->id < node_position->next->contents->id) {
+                add_node(node, list_position, node_position);
+                return 1;
+            }
+        }
+        node_position = node_position->next;
+        add_node(node, list_position, node_position);
+    }
+    else {
+        for (int i = 0; i != MaxM; i++) {
+            if (node->id < (&arr[i])->id) {
+                aux = i - 1;
+                break;
+            }
+            else {
+                aux = i;
+            }
+        }
+        arr = (&arr[aux])->child;
+        insert_node(node, arr);
+    }
+    return 0;
 }
 
-tree_node *new_tree(int key, record* pointer){
-    tree_node* root = make_leaf();
-    root->keys[0] = key;
-    root-> pointers[0] = pointer;
-    root -> pointers[MaxL -1] = NULL;
-    root -> num_keys++;
-    return root;
+record* read_file(FILE* fp) {
+    record* node = (record*) malloc(sizeof(record));
+    if(node == NULL){
+        printf("Error");
+        return NULL;
+    }
+    fscanf(fp, " %d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%d;%[^;];%d;%[^\n]", &node->id, node->firstname,
+           node->surname, node->birthdate, node->died, node->Country, node->CountryCode, node->City,
+           node->gender, &node->year, node->category, &node->share, node->motivation);
+    return node;
 }
 
 int main(int argc, char *argv[]) {
-
+    FILE *fp = fopen("nobel_prizes_projeto.csv", "r");
     printf("Size of struct; %lu\n", sizeof(record));
-
+    insert_node(read_file(fp));
     return 0;
 }
+
 
