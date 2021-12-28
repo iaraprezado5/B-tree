@@ -37,8 +37,8 @@ typedef struct tree_node{
     uint32_t id;
     struct tree_node* child;
     list_node* list;
+    struct tree_node* next;
 }tree_node;
-
 
 int size_list(list_node * list_position){
     int tamanho;
@@ -49,7 +49,23 @@ int size_list(list_node * list_position){
     return tamanho;
 }
 
-int add_node(){
+int size_array(tree_node arr[]){
+    int tamanho_arr;
+    while(arr -> next != NULL){
+        arr = arr -> next;
+        tamanho_arr++;
+    }
+    tamanho_arr++;
+    return tamanho_arr;
+}
+int add_node(tree_node arr[], record* node){
+    if(size_array(arr) < MaxM){
+        //adicionar node
+    }
+    else{
+        //split
+        //adicionar node
+    }
 
 }
 
@@ -72,12 +88,12 @@ int insert_node(record* node, tree_node arr[]){
         list_node* node_position = (&arr)[aux]->list;
         for (; node_position->next != NULL; node_position = node_position->next) {
             if (node->id < node_position->next->contents->id) {
-                add_node(node, list_position, node_position);
+                add_node(arr, node);
                 return 1;
             }
         }
         node_position = node_position->next;
-        add_node(node, list_position, node_position);
+        add_node(arr, node);
     }
     else {
         for (int i = 0; i != MaxM; i++) {
@@ -106,6 +122,7 @@ record* read_file(FILE* fp) {
            node->gender, &node->year, node->category, &node->share, node->motivation);
     return node;
 }
+
 
 int main(int argc, char *argv[]) {
     FILE *fp = fopen("nobel_prizes_projeto.csv", "r");
