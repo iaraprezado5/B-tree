@@ -123,17 +123,6 @@ record* read_file(FILE* fp) {
     return node;
 }
 
-//root inicial
-int rootInicial(tree_node arr[]){
-    int Keys = 0;
-    list_node e;
-    
-    //percorrer os primeiros 5 elementos
-    for(e = arr[Keys]; Keys != 4; Keys++){
-        //bubblesort
-    }
-    //chamar o insertnode
-}
 
 int main(int argc, char *argv[]) {
     FILE *fp = fopen("nobel_prizes_projeto.csv", "r");
