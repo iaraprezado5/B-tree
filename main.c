@@ -2,6 +2,10 @@
 
 //Input is a file with the following structure (seperated by ;), where each line is a record. First line must be ignored.
 
+//Implemente um B+ Tree, assume registos de 708bytes e blocos (blocks) de 4Kbytes, a chave (key) é um inteiro de 32 bits (int32_t).
+
+//Input is a file with the following structure (seperated by ;), where each line is a record. First line must be ignored.
+
 #define MaxM 5 //size of the tree arrays
 #define MaxL 5 //size of linked list
 #define Meio 3
@@ -44,15 +48,6 @@ typedef struct tree_node{
 
 }tree_node;
 
-int size_list(list_node * list_position){
-    int size;
-    while(list_position ->next != NULL){
-        size++;
-    }
-    size++;
-    return size;
-}
-
 int size_array(tree_node arr[]){
     int size_arr;
     while(arr -> next != NULL){
@@ -62,6 +57,7 @@ int size_array(tree_node arr[]){
     size_arr++;
     return size_arr;
 }
+
 
 tree_node* insert_into_leaf(tree_node* leaf, record* node){
     int i;
@@ -90,34 +86,58 @@ tree_node* make_leaf(void){
     return new_leaf;
 };
 
-tree_node* split(tree_node* root, tree_node* old_node, int left_index, int key, tree_node*right ){
-    int **temp_keys;
-    tree_node** temp_pointer;
-    temp_keys = malloc(sizeof(tree_node));
-    if(temp_keys == NULL){
+tree_node* split(tree_node* leaf, int key, record* node ){
+    tree_node* new_leaf;
+    int *temp_keys;
+    void **temp_pointers;
+    int i, j, insertion_point,new_key;
+
+    new_leaf= make_leaf();
+    if(new_leaf == NULL){
         printf("Error");
         return NULL;
     }
-    for(int i = 0, j = 0; i < old_node ->keys +1; i++, j++){
-        if(j == left_index +1){
+    insertion_point = 0;
+    while((insertion_point < MaxL )&& (leaf->keys[insertion_point]< key)){
+        insertion_point++;
+    }
+    for(i = 0, j = 0; i < leaf->keys; i++, j++){
+        if (j == insertion_point){
             j++;
         }
-        temp_pointer[j] = old_node->pointers[i];
+        temp_keys[j] = leaf->keys[i];
+        temp_pointers[j] = leaf->pointers[i];
     }
-    temp_keys[left_index +1] = right;
-    for(int i = 0, j = 0; i < old_node->keys; i++,j++){
-        if(j == left_index){
-            j++;
-        }
-        temp_keys[j] = old_node->keys[i];
+    temp_keys[insertion_point] = key;
+    temp_pointers[insertion_point] = node;
+
+    leaf->keys = 0;
+    for(i = 0; i < Meio; i++){
+        leaf->pointers[i] = temp_pointers[i];
+        leaf->keys[i] = temp_keys[i];
+        leaf->keys++;
     }
+    for (i = 3, j = 0; i < MaxL; i++, j++){
+        new_leaf->pointers[j] = temp_pointers[i];
+        new_leaf->keys[j] = temp_keys[i];
+        new_leaf->keys++;
+    }
+    free(temp_pointers);
+    free(temp_keys);
+    new_leaf->pointers[Meio] = leaf ->pointers[Meio];
+    leaf->pointers[Meio] = new_leaf;
 
-    temp_pointer[left_index + 1] = right;
-    temp_keys[left_index] = key;
-
-    old_node-> keys = 0;
-    
+    for(i = leaf-> keys; i < Meio; i++){
+        leaf->pointers[i] = NULL;
+    }
+    for(i = new_leaf-> keys; i < Meio; i++){
+        new_leaf->pointers[i] = NULL;
+    }
+    new_leaf->parent = leaf->parent;
+    return new_leaf;
 }
+
+
 
 
 int add_node(tree_node arr[], record* node){
@@ -125,8 +145,8 @@ int add_node(tree_node arr[], record* node){
         insert_into_leaf(make_leaf(), node);
     }
     else{
-        //split
-        //adicionar node
+        split(make_leaf(),int key, node);
+        insert_into_leaf(make_leaf(), node);
     }
 
 }
@@ -146,7 +166,6 @@ int insert_node(record* node, tree_node arr[]){
                 aux = i;
             }
         }
-        list_node* list_position = (&arr)[aux]->list;
         list_node* node_position = (&arr)[aux]->list;
         for (; node_position->next != NULL; node_position = node_position->next) {
             if (node->id < node_position->next->contents->id) {
@@ -154,7 +173,6 @@ int insert_node(record* node, tree_node arr[]){
                 return 1;
             }
         }
-        node_position = node_position->next;
         add_node(arr, node);
     }
     else {
@@ -191,8 +209,8 @@ record* read_file(FILE* fp) {
 int main(int argc, char *argv[]) {
     FILE *fp = fopen("nobel_prizes_projeto.csv", "r");
     printf("Size of struct; %lu\n", sizeof(record));
-    insert_node(read_file(fp));
     return 0;
+
 }
 
 
