@@ -6,8 +6,13 @@
 
 //Input is a file with the following structure (seperated by ;), where each line is a record. First line must be ignored.
 
+//Implemente um B+ Tree, assume registos de 708bytes e blocos (blocks) de 4Kbytes, a chave (key) é um inteiro de 32 bits (int32_t).
+
+//Input is a file with the following structure (seperated by ;), where each line is a record. First line must be ignored.
+
 #define MaxM 5 //size of the tree arrays
 #define MaxL 5 //size of linked list
+#define Meio 3
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -43,6 +48,7 @@ typedef struct tree_node{
     list_node* list;
     struct tree_node* next;
     int *keys;
+    void **pointers;
 
 }tree_node;
 
@@ -91,6 +97,35 @@ tree_node* make_leaf(void){
     new_leaf->next = NULL;
     return new_leaf;
 };
+
+tree_node* split(tree_node* root, tree_node* old_node, int left_index, int key, tree_node*right ){
+    int **temp_keys;
+    tree_node** temp_pointer;
+    temp_keys = malloc(sizeof(tree_node));
+    if(temp_keys == NULL){
+        printf("Error");
+        return NULL;
+    }
+    for(int i = 0, j = 0; i < old_node ->keys +1; i++, j++){
+        if(j == left_index +1){
+            j++;
+        }
+        temp_pointer[j] = old_node->pointers[i];
+    }
+    temp_keys[left_index +1] = right;
+    for(int i = 0, j = 0; i < old_node->keys; i++,j++){
+        if(j == left_index){
+            j++;
+        }
+        temp_keys[j] = old_node->keys[i];
+    }
+
+    temp_pointer[left_index + 1] = right;
+    temp_keys[left_index] = key;
+
+    old_node-> keys = 0;
+    
+}
 
 
 int add_node(tree_node arr[], record* node){
@@ -163,10 +198,11 @@ record* read_file(FILE* fp) {
 
 int main(int argc, char *argv[]) {
     FILE *fp = fopen("nobel_prizes_projeto.csv", "r");
-    //printf("Size of struct; %lu\n", sizeof(record));
+    printf("Size of struct; %lu\n", sizeof(record));
     insert_node(read_file(fp));
     return 0;
 }
+
 
 
 
