@@ -2,10 +2,6 @@
 
 //Input is a file with the following structure (seperated by ;), where each line is a record. First line must be ignored.
 
-//Implemente um B+ Tree, assume registos de 708bytes e blocos (blocks) de 4Kbytes, a chave (key) é um inteiro de 32 bits (int32_t).
-
-//Input is a file with the following structure (seperated by ;), where each line is a record. First line must be ignored.
-
 #define MaxM 5 //size of the tree arrays
 #define MaxL 5 //size of linked list
 #define Meio 3
@@ -204,15 +200,12 @@ record* read_file(FILE* fp) {
     return node;
 }
 
-
-
 int main(int argc, char *argv[]) {
     FILE *fp = fopen("nobel_prizes_projeto.csv", "r");
     printf("Size of struct; %lu\n", sizeof(record));
+    insert_node(make_leaf(), read_file(fp));
     return 0;
 
 }
-
-
 
 
